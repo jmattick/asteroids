@@ -27,7 +27,7 @@ also dropped. The data was split into 70% training data, 15% development data, a
 15% test data using sklearn's train_test_split. Data was normalized using sklearn's 
 StandardScaler. 
 
-```{python}
+```python
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -70,3 +70,57 @@ X_train = sc.transform(X_train)
 X_dev = sc.transform(X_dev)
 X_test = sc.transform(X_test)
 ```
+
+To help test models a function was created to return accuracy 
+when given a training and test dataset and a model. 
+
+```python
+from sklearn.metrics import accuracy_score
+
+def test_model(train_X, val_X, train_y, val_y, model):
+    """Function to return the accuracy of a given model and dataset"""
+    # Fit model
+    model.fit(train_X, train_y)
+
+    # get predicted values
+    val_predict = model.predict(val_X)
+
+    # return accuracy
+    return accuracy_score(val_y, val_predict)
+```
+
+The first model tested was an SVM implemented in sklearn  
+sklearn.svm.SVC. Using the default parameters, the accuracy was
+0.9516 using the development dataset.
+
+```python
+from sklearn.svm import SVC
+
+# default SVM 
+svm = SVC()
+
+# calculate accuracy
+accuracy = test_model(X_train, X_dev, y_train, y_dev, svm)
+```
+
+A function was created to help optimize the regularization parameter in the SVM
+model. This function returns a list of the values used and accuracy of the models.
+
+```python
+def test_svm_c(train_X, val_X, train_y, val_y,c_list=[0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000]):
+    """Function to test SVM using different regularization parameters"""
+    res = []
+    for c in c_list:
+        model = SVC(C=c)
+        res.append(test_model(train_X, val_X, train_y, val_y, model))
+
+    return c_list, res
+
+c_list, acc = test_svm_c(X_train, X_dev, y_train, y_dev)
+```
+
+The best value of C was 100. This resulted in an accuracy of 0.9644.
+The accuracy at each value of C is shown in the following plot. 
+
+![c optimization](svm_c_tests.png)
+
