@@ -1,10 +1,11 @@
-# asteroids
+# Predicting Asteroid Hazards
 
 Data was downloaded from: https://www.kaggle.com/shrutimehta/nasa-asteroids-classification
 
-Data is found in `nasa.csv`
+Data can be found in `nasa.csv`
 
-The dataset contains information about 4687 asteroids and a hazardous classification. 
+The dataset contains information about 4687 asteroids and a hazardous classification of True or False. 
+
 The features in the dataset are:
 'Neo Reference ID', 'Name', 'Absolute Magnitude', 'Est Dia in KM(min)',
        'Est Dia in KM(max)', 'Est Dia in M(min)', 'Est Dia in M(max)',
@@ -76,7 +77,7 @@ X_test = sc.transform(X_test)
 
 To help test models, a function was created to return the f1 score 
 when given a training and test dataset and a model. The f1 score was used to evaluate 
-the models since the distribution of classes was not uniform. 
+the models since the distribution of hazard class was not uniform. 
 
 ```python
 from sklearn.metrics import f1_score
@@ -127,7 +128,7 @@ c_list, acc = test_svm_c(X_train, X_dev, y_train, y_dev)
 plt.plot(c_list, acc)
 plt.xscale('log')
 plt.xlabel("Regularization Parameter (C)")
-plt.ylabel("Accuracy")
+plt.ylabel("F1 score")
 plt.savefig("svm_c_tests.png")
 plt.close()
 ```
@@ -228,7 +229,7 @@ def test_k(train_X, val_X, train_y, val_y,k_list=[5, 6, 7, 8, 9, 10]):
 k_list, acc = test_k(X_train, X_dev, y_train, y_dev)
 plt.plot(k_list, acc)
 plt.xlabel("K value")
-plt.ylabel("Accuracy")
+plt.ylabel("F1 score")
 plt.savefig("knn_k_tests.png")
 plt.close()
 ```
@@ -272,8 +273,8 @@ test_acc.append(test_model(X_train, X_test, y_train, y_test, baseline_most_frequ
 # plot f1_score for each model
 plt.bar(models, test_acc)
 plt.xlabel("Model")
-plt.ylabel("Accuracy")
-plt.title("Accuracy of model")
+plt.ylabel("F1 score")
+plt.title("F1 score of model")
 plt.savefig("model_comparison_test.png")
 plt.close()
 ```
