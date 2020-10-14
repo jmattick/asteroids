@@ -74,29 +74,30 @@ X_dev = sc.transform(X_dev)
 X_test = sc.transform(X_test)
 ```
 
-To help test models, a function was created to return accuracy 
-when given a training and test dataset and a model. 
+To help test models, a function was created to return the f1 score 
+when given a training and test dataset and a model. The f1 score was used to evaluate 
+the models since the distribution of classes was not uniform. 
 
 ```python
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score
 
 def test_model(train_X, val_X, train_y, val_y, model):
-    """Function to return the accuracy of a given model and dataset"""
+    """Function to return the f1_score of a given model and dataset"""
     # Fit model
     model.fit(train_X, train_y)
 
     # get predicted values
     val_predict = model.predict(val_X)
 
-    # return accuracy
-    return accuracy_score(val_y, val_predict)
+    # return f1_score
+    return f1_score(val_y, val_predict)
 ```
 
 ### Support Vector Machine
 
 The first model tested was an SVM implemented in sklearn  
-sklearn.svm.SVC. Using the default parameters, the accuracy was
-0.9516 using the development dataset.
+sklearn.svm.SVC. Using the default parameters, the f1 score was
+0.8454 using the development dataset.
 
 ```python
 from sklearn.svm import SVC
@@ -104,12 +105,12 @@ from sklearn.svm import SVC
 # default SVM 
 svm = SVC()
 
-# calculate accuracy
-accuracy = test_model(X_train, X_dev, y_train, y_dev, svm)
+# calculate f1_score
+f1_score = test_model(X_train, X_dev, y_train, y_dev, svm)
 ```
 
 A function was created to help optimize the regularization parameter in the SVM
-model. This function returns a list of the values used and accuracy of the models.
+model. This function returns a list of the values used and f1 score of the models.
 
 ```python
 def test_svm_c(train_X, val_X, train_y, val_y,c_list=[0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000]):
@@ -121,7 +122,7 @@ def test_svm_c(train_X, val_X, train_y, val_y,c_list=[0.0001, 0.001, 0.01, 0.1, 
 
     return c_list, res
 
-# plot SVM accuracy vs C
+# plot SVM f1_score vs C
 c_list, acc = test_svm_c(X_train, X_dev, y_train, y_dev)
 plt.plot(c_list, acc)
 plt.xscale('log')
@@ -131,8 +132,8 @@ plt.savefig("svm_c_tests.png")
 plt.close()
 ```
 
-The best value of C was 100. This resulted in an accuracy of 0.9644.
-The accuracy at each value of C is shown in the following plot. 
+The best value of C was 100. This resulted in an f1 score of 0.8936.
+The f1 score at each value of C is shown in the following plot. 
 
 ![c optimization](svm_c_tests.png)
 
@@ -168,7 +169,7 @@ class KNN(object):
 
 
     def find_nearest_neighbors(self, train_x, train_y, p):
-        """Cacluate k nearest neighbors given a trainin dataset and a test row"""
+        """Calculate k nearest neighbors given a training dataset and a test row"""
         # initialize list to act as priority queue of distances
         dists = []
         # loop through the training data
@@ -199,7 +200,7 @@ class KNN(object):
             for n in knn:
                 # get target value
                 value = n[-1]
-                # increment target vote by 1 if already in dictrionary
+                # increment target vote by 1 if already in dictionary
                 if value in votes:
                     votes[value] = votes[value] + 1
                 # else initialize vote to 1
@@ -211,7 +212,7 @@ class KNN(object):
 ```
 
 To identify the optimal k value for the KNN classifier, a function was created
-to test the accuracy of the model at each value.
+to test the f1 score of the model at each value.
 
 ```python
 def test_k(train_X, val_X, train_y, val_y,k_list=[5, 6, 7, 8, 9, 10]):
@@ -223,7 +224,7 @@ def test_k(train_X, val_X, train_y, val_y,k_list=[5, 6, 7, 8, 9, 10]):
 
     return k_list, res
 
-# plot KNN accuracy vs C
+# plot KNN f1_score vs C
 k_list, acc = test_k(X_train, X_dev, y_train, y_dev)
 plt.plot(k_list, acc)
 plt.xlabel("K value")
@@ -233,14 +234,14 @@ plt.close()
 ```
 
 The results of the test_k function are shown below. This identified 8 as the optimal k 
-value resulting in an accuracy of 0.8947 when tested using the development dataset.
+value resulting in an f1 score of 0.6408 when tested using the development dataset.
 ![k optimization](knn_k_tests.png)
 
 ### Baseline Models
 
 To help evaluate performance of the models, two baseline models were used. The
 DummyClassifier from sklearn was used with either a stratified strategy or a most_popular
-strategy. The accuracy was 0.7354 for the stratified baseline and 0.8335 for the most_frequent
+strategy. The f1 score was 0.1714 for the stratified baseline and 0.0 for the most_frequent
 baseline model using the development dataset. Both the KNN and SVM models performed better than 
 the baseline. 
 
@@ -268,7 +269,7 @@ test_acc.append(test_model(X_train, X_test, y_train, y_test, knn))
 test_acc.append(test_model(X_train, X_test, y_train, y_test, baseline_stratified))
 test_acc.append(test_model(X_train, X_test, y_train, y_test, baseline_most_frequent))
 
-# plot accuracy for each model
+# plot f1_score for each model
 plt.bar(models, test_acc)
 plt.xlabel("Model")
 plt.ylabel("Accuracy")
@@ -277,9 +278,9 @@ plt.savefig("model_comparison_test.png")
 plt.close()
 ```
 
-The SVM model had the best performance with an accuracy score of 0.9488. The accuracy of 
-the KNN model (0.9019)  was slightly above the most_frequent baseline (0.8366). The 
-stratified baseline performed the worst with and accuracy of 0.6974. The accuracy of the models
+The SVM model had the best performance with an f1 score score of 0.8407. The f1 score of 
+the KNN model (0.6600) was above the stratified baseline (0.1472). The 
+most_frequent baseline performed the worst with an f1 score of 0.0. The f1 score of the models
 is shown below.
  
 ![test comparison](model_comparison_test.png)
@@ -287,7 +288,8 @@ is shown below.
 ### Usage
  
 All code is found in `asteroids.py`. The script will read the `nasa.csv`
-file in the same directory as the script. It will output 3 plots. 
+file in the same directory as the script. It will output 3 plots: svm_c_tests.png, 
+knn_k_tests.png, and model_comparison_test.png
  
 Example: 
  

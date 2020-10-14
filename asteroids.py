@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, f1_score
 from sklearn.svm import SVC
 from sklearn.dummy import DummyClassifier
 import matplotlib.pyplot as plt
@@ -118,7 +118,7 @@ def test_model(train_X, val_X, train_y, val_y, model):
     val_predict = model.predict(val_X)
 
     # return accuracy
-    return accuracy_score(val_y, val_predict)
+    return f1_score(val_y, val_predict)
 
 
 def test_svm_c(train_X, val_X, train_y, val_y,c_list=[0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000]):
@@ -146,7 +146,7 @@ c_list, acc = test_svm_c(X_train, X_dev, y_train, y_dev)
 plt.plot(c_list, acc)
 plt.xscale('log')
 plt.xlabel("Regularization Parameter (C)")
-plt.ylabel("Accuracy")
+plt.ylabel("F1 score")
 plt.savefig("svm_c_tests.png")
 plt.close()
 
@@ -176,7 +176,7 @@ knn = KNN(k=8)
 k_list, acc = test_k(X_train, X_dev, y_train, y_dev)
 plt.plot(k_list, acc)
 plt.xlabel("K value")
-plt.ylabel("Accuracy")
+plt.ylabel("F1 score")
 plt.savefig("knn_k_tests.png")
 plt.close()
 
@@ -199,8 +199,8 @@ test_acc.append(test_model(X_train, X_test, y_train, y_test, baseline_most_frequ
 # plot accuracy for each model
 plt.bar(models, test_acc)
 plt.xlabel("Model")
-plt.ylabel("Accuracy")
-plt.title("Accuracy of model")
+plt.ylabel("F1 score")
+plt.title("F1 score of model")
 plt.savefig("model_comparison_test.png")
 plt.close()
 
