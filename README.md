@@ -1,6 +1,7 @@
 # asteroids
 
 Data was downloaded from: https://www.kaggle.com/shrutimehta/nasa-asteroids-classification
+Data is found in `nasa.csv`.
 
 The dataset contains information about 4687 asteroids and a hazardous classification. 
 The features in the dataset are:
@@ -89,6 +90,8 @@ def test_model(train_X, val_X, train_y, val_y, model):
     return accuracy_score(val_y, val_predict)
 ```
 
+### Support Vector Machine
+
 The first model tested was an SVM implemented in sklearn  
 sklearn.svm.SVC. Using the default parameters, the accuracy was
 0.9516 using the development dataset.
@@ -124,3 +127,145 @@ The accuracy at each value of C is shown in the following plot.
 
 ![c optimization](svm_c_tests.png)
 
+### K-Nearest Neighbors
+
+The next model tested was a KNN classifier. The implementation used is shown below. 
+The KNN classifier uses 3 basic steps. 
+
+1. The euclidean distance is calculated (euclidean_dist() function)
+
+2. Get k nearest neighbors (find_nearest_neighbors() function)
+
+3. Make predictions based on class with most votes from nearest neighbors (predict() function)
+
+```python
+class KNN(object):
+    """Implementation of K-nearest Neighbor Classifier"""
+    def __init__(self, k=5, random_state=1):
+        self.k = k
+        self.random_state = 1
+
+
+    def euclidean_dist(self, p1, p2):
+        """Calculate euclidean distance between two datapoints"""
+        # initialize distance to zero
+        dist = 0.0
+        # loop through all values in data[pomt
+        for i in range(len(p1)-1):
+            # add squared difference
+            dist += (p1[i] - p2[i])**2
+        # return square root of distance
+        return sqrt(dist)
+
+
+    def find_nearest_neighbors(self, train_x, train_y, p):
+        """Cacluate k nearest neighbors given a trainin dataset and a test row"""
+        # initialize list to act as priority queue of distances
+        dists = []
+        # loop through the training data
+        for (row, y) in zip(train_x, train_y):
+            # calculate the euclidean distance at each row
+            dist = self.euclidean_dist(row, p)
+            # add the distance and data to the priority queue
+            heapq.heappush(dists, (dist, row, y))
+        # return k nearest neighbors
+        return heapq.nsmallest(self.k, dists)
+
+
+    def fit(self, X, y):
+        self.train_x = X
+        self.train_y = y
+
+
+    def predict(self, X):
+        # initialize predictions list
+        predictions = []
+        # loop through each row in the dataset
+        for row in X:
+            # get k nearest neighbors
+            knn = self.find_nearest_neighbors(self.train_x, self.train_y, row)
+            # dictionary to hold votes for target values
+            votes = dict()
+            # loop through all neighbors
+            for n in knn:
+                # get target value
+                value = n[-1]
+                # increment target vote by 1 if already in dictrionary
+                if value in votes:
+                    votes[value] = votes[value] + 1
+                # else initialize vote to 1
+                else:
+                    votes[value] = 1
+            # append target value with max votes to predictions
+            predictions.append(max(votes, key=votes.get))
+        return predictions
+```
+
+To identify the optimal k value for the KNN classifier, a function was created
+to test the accuracy of the model at each value.
+
+```python
+def test_k(train_X, val_X, train_y, val_y,k_list=[5, 6, 7, 8, 9, 10]):
+    """Function to test SVM using different regularization parameters"""
+    res = []
+    for k in k_list:
+        model = KNN(k=k)
+        res.append(test_model(train_X, val_X, train_y, val_y, model))
+
+    return k_list, res
+```
+
+The results of the test_k function are shown below. This identified 8 as the optimal k 
+value resulting in an accuracy of 0.8947 when tested using the development dataset.
+![k optimization](knn_k_tests.png)
+
+### Baseline Models
+
+To help evaluate performance of the models, two baseline models were used. The
+DummyClassifier from sklearn was used with either a stratified strategy or a most_popular
+strategy. The accuracy was 0.7354 for the stratified baseline and 0.8335 for the most_frequent
+baseline model using the development dataset. Both the KNN and SVM models performed better than 
+the baseline. 
+
+```python
+from sklearn.dummy import DummyClassifier
+# set baseline models
+baseline_stratified = DummyClassifier(strategy='stratified')
+baseline_most_frequent = DummyClassifier(strategy='most_frequent')
+# test models
+test_model(X_train, X_dev, y_train, y_dev, baseline_stratified)
+test_model(X_train, X_dev, y_train, y_dev, baseline_most_frequent)
+```
+
+### Model Comparison
+
+The performance of the SVM model with C=100 and the KNN model with k=8 was evaluated 
+using the test dataset. The baseline models were also included in these tests.
+
+```python
+# test models on development dataset
+test_acc = []
+models = ['SVM (C=100)', 'KNN (k=8)', 'Stratified', 'Most Frequent']
+test_acc.append(test_model(X_train, X_test, y_train, y_test, svm_c100))
+test_acc.append(test_model(X_train, X_test, y_train, y_test, knn))
+test_acc.append(test_model(X_train, X_test, y_train, y_test, baseline_stratified))
+test_acc.append(test_model(X_train, X_test, y_train, y_test, baseline_most_frequent))
+```
+
+The SVM model had the best performance with an accuracy score of 0.9488. The accuracy of 
+the KNN model (0.9019)  was slightly above the most_frequent baseline (0.8366). The 
+stratified baseline performed the worst with and accuracy of 0.6974. The accuracy of the models
+is shown below.
+ 
+![test comparison](model_comparison_test.png)
+ 
+### Usage
+ 
+All code is found in `asteroids.py`. The script will read the `nasa.csv`
+file in the same directory as the script. It will output 3 plots. 
+ 
+Example: 
+ 
+```
+python asteroids.py
+```
