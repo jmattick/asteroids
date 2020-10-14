@@ -1,7 +1,8 @@
 # asteroids
 
 Data was downloaded from: https://www.kaggle.com/shrutimehta/nasa-asteroids-classification
-Data is found in `nasa.csv`.
+
+Data is found in `nasa.csv`
 
 The dataset contains information about 4687 asteroids and a hazardous classification. 
 The features in the dataset are:
@@ -19,6 +20,7 @@ The features in the dataset are:
        'Asc Node Longitude', 'Orbital Period', 'Perihelion Distance',
        'Perihelion Arg', 'Aphelion Dist', 'Perihelion Time', 'Mean Anomaly',
        'Mean Motion', and 'Equinox'.
+
 Some of the features can be eliminated as duplicates since they are the same 
 metric using different units (distance, velocity).
 
@@ -46,7 +48,7 @@ features = ['Absolute Magnitude', 'Est Dia in KM(min)',
        'Epoch Osculation', 'Eccentricity', 'Semi Major Axis', 'Inclination',
        'Asc Node Longitude', 'Orbital Period', 'Perihelion Distance',
        'Perihelion Arg', 'Aphelion Dist', 'Perihelion Time', 'Mean Anomaly',
-       'Mean Motion', 'Hazardous']
+       'Mean Motion']
 
 # set target
 y = data.Hazardous
@@ -72,7 +74,7 @@ X_dev = sc.transform(X_dev)
 X_test = sc.transform(X_test)
 ```
 
-To help test models a function was created to return accuracy 
+To help test models, a function was created to return accuracy 
 when given a training and test dataset and a model. 
 
 ```python
@@ -119,7 +121,14 @@ def test_svm_c(train_X, val_X, train_y, val_y,c_list=[0.0001, 0.001, 0.01, 0.1, 
 
     return c_list, res
 
+# plot SVM accuracy vs C
 c_list, acc = test_svm_c(X_train, X_dev, y_train, y_dev)
+plt.plot(c_list, acc)
+plt.xscale('log')
+plt.xlabel("Regularization Parameter (C)")
+plt.ylabel("Accuracy")
+plt.savefig("svm_c_tests.png")
+plt.close()
 ```
 
 The best value of C was 100. This resulted in an accuracy of 0.9644.
@@ -213,6 +222,14 @@ def test_k(train_X, val_X, train_y, val_y,k_list=[5, 6, 7, 8, 9, 10]):
         res.append(test_model(train_X, val_X, train_y, val_y, model))
 
     return k_list, res
+
+# plot KNN accuracy vs C
+k_list, acc = test_k(X_train, X_dev, y_train, y_dev)
+plt.plot(k_list, acc)
+plt.xlabel("K value")
+plt.ylabel("Accuracy")
+plt.savefig("knn_k_tests.png")
+plt.close()
 ```
 
 The results of the test_k function are shown below. This identified 8 as the optimal k 
@@ -250,6 +267,14 @@ test_acc.append(test_model(X_train, X_test, y_train, y_test, svm_c100))
 test_acc.append(test_model(X_train, X_test, y_train, y_test, knn))
 test_acc.append(test_model(X_train, X_test, y_train, y_test, baseline_stratified))
 test_acc.append(test_model(X_train, X_test, y_train, y_test, baseline_most_frequent))
+
+# plot accuracy for each model
+plt.bar(models, test_acc)
+plt.xlabel("Model")
+plt.ylabel("Accuracy")
+plt.title("Accuracy of model")
+plt.savefig("model_comparison_test.png")
+plt.close()
 ```
 
 The SVM model had the best performance with an accuracy score of 0.9488. The accuracy of 

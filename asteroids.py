@@ -186,7 +186,7 @@ plt.close()
 # print(test_model(X_train, X_dev, y_train, y_dev, baseline_most_frequent))
 
 # test models on development dataset
-print('Accuracy using test dataset')
+# print('Accuracy using test dataset')
 test_acc = []
 models = ['SVM (C=100)', 'KNN (k=8)', 'Stratified', 'Most Frequent']
 test_acc.append(test_model(X_train, X_test, y_train, y_test, svm_c100))
@@ -194,7 +194,7 @@ test_acc.append(test_model(X_train, X_test, y_train, y_test, knn))
 test_acc.append(test_model(X_train, X_test, y_train, y_test, baseline_stratified))
 test_acc.append(test_model(X_train, X_test, y_train, y_test, baseline_most_frequent))
 
-print(test_acc)
+# print(test_acc)
 
 # plot accuracy for each model
 plt.bar(models, test_acc)
